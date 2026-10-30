@@ -4,7 +4,6 @@
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  const allowed = ["kapeloeddybrowse@gmail.com", "johnchesiro43@gmail.com"];
   const $ = (id) => document.getElementById(id);
   const message = (id, value) => { $(id).textContent = value || ""; };
   const cleanUrl = (value) => {
@@ -15,7 +14,9 @@
   };
   async function currentAdmin() {
     const { data: { user }, error } = await client.auth.getUser();
-    if (error || !user || !allowed.includes((user.email || "").toLowerCase())) return null;
+    if (error || !user) return null;
+    const { data: isAdmin, error: roleError } = await client.rpc("is_portfolio_admin");
+    if (roleError || isAdmin !== true) return null;
     return user;
   }
   async function render() {
@@ -57,14 +58,12 @@
   $("login-form").addEventListener("submit", async (event) => {
     event.preventDefault(); message("login-message","Signing in…");
     const email=$("email").value.trim().toLowerCase();
-    if (!allowed.includes(email)) { message("login-message","This account is not authorised."); return; }
     const {error}=await client.auth.signInWithPassword({email,password:$("password").value});
     if (error) { message("login-message","Sign-in failed. Check your credentials or use password reset."); return; }
     $("password").value=""; message("login-message","Signed in."); await render();
   });
   $("reset-button").addEventListener("click", async () => {
     const email=$("email").value.trim().toLowerCase();
-    if (!allowed.includes(email)) { message("login-message","Enter one of the approved administrator emails first."); return; }
     const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin + "/admin.html"});
     message("login-message",error ? "Could not send reset email. Check Supabase email settings." : "If the account exists, a password reset email has been sent.");
   });
