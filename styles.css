@@ -24,3 +24,10 @@
 .future-card .project-status{color:#b9aaff;border-color:rgba(185,170,255,.35)}
 @media(max-width:600px){.projects-grid{grid-template-columns:1fr}.wallpaper-video{opacity:.16}.future-card{min-height:230px}}
 @media(prefers-reduced-motion:reduce){.wallpaper-video{display:none}}
+
+/* Keep the ambient video visible behind the page content. */
+html,body{min-height:100%;background:#0b1020}
+body{background:transparent}
+.wallpaper-video{z-index:-2}
+.wallpaper-shade{z-index:-1}
+.site-shell{z-index:0}
